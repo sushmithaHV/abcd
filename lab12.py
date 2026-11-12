@@ -1,0 +1,40 @@
+from flask import Flask,request,jsonify
+import re
+app = Flask(__name__)
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-ZA-Z0-9.-]+\.[a-ZA-Z]{2,}$'
+    return re.match(pattern,email)is not None
+
+@app.route('/register',methods=['POST'])
+def register():
+    data = request.get_json()
+    name = data.get('name','')
+    email = data.get('email','')
+    
+    if not name or not email:
+        return jsonify({
+            "success":False,"status_code":400,
+            "message":"validation error",
+            "error":{
+                "name":"Name is required" if not name else None,
+                "email":"Email is required" if not email else None
+            }
+        }),400
+    
+    if not is_valid_email(email):
+        return jsonify({
+            "success":False,"status_code":400,
+            "message":"vlaidation Error",
+            "errors":{"email":"invalid emial format"}
+        }),400
+        
+    return jsonify({
+        "success":True,"status_code":201,
+        "message":f"user{name} registered successfully",
+        "data":{"name":name,"email":email}
+    }),201
+    
+if __name__=='__main__':
+    app.run(debug=True)
+            
+            
